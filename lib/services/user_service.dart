@@ -88,7 +88,7 @@ class UserService {
       'cnicBackUrl': cnicBackUrl,
       'selfieUrl': selfieUrl,
       'termsAccepted': termsAccepted,
-      'verificationStatus': VerificationStatus.pending.value,
+      'verificationStatus': VerificationStatus.approved.value,
       'updatedAt': Timestamp.fromDate(DateTime.now()),
     });
   }
