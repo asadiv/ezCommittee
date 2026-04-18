@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function userData(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function isAdmin() {
+      return signedIn() && userData(request.auth.uid).isAdmin == true;
+    }
+
+    function isCommitteeMember(committeeId) {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/committees/$(committeeId)/memberships/$(request.auth.uid));
+    }
+
+    function isCommitteeOwner(committeeId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/committees/$(committeeId)).data.ownerId == request.auth.uid;
+    }
+
+    match /users/{uid} {
+      allow create: if isSelf(uid);
+      allow read, update: if isSelf(uid) || isAdmin();
+      allow delete: if false;
+
+      match /memberships/{committeeId} {
+        allow read, write: if isSelf(uid);
+      }
+    }
+
+    match /committees/{committeeId} {
+      allow create: if signedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow read: if isCommitteeMember(committeeId) || isAdmin();
+      allow update: if isCommitteeOwner(committeeId) || isAdmin();
+      allow delete: if false;
+
+      match /memberships/{uid} {
+        allow read: if isCommitteeMember(committeeId) || isAdmin();
+        allow create: if isCommitteeOwner(committeeId) || isSelf(uid);
+        allow update, delete: if isCommitteeOwner(committeeId) || isAdmin();
+      }
+
+      match /messages/{messageId} {
+        allow read: if isCommitteeMember(committeeId) || isAdmin();
+        allow create: if isCommitteeMember(committeeId)
+          && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if false;
+      }
+
+      match /disputes/{disputeId} {
+        allow read: if isCommitteeMember(committeeId) || isAdmin();
+        allow create: if isCommitteeMember(committeeId)
+          && request.resource.data.raisedByUid == request.auth.uid;
+        allow update: if isCommitteeOwner(committeeId) || isAdmin();
+        allow delete: if false;
+      }
+
+      match /payouts/{payoutId} {
+        allow read: if isCommitteeMember(committeeId) || isAdmin();
+        allow create, update: if isCommitteeOwner(committeeId) || isAdmin();
+        allow delete: if false;
+      }
+    }
+
+    match /payments/{paymentId} {
+      allow read: if signedIn() && (
+        resource.data.memberUid == request.auth.uid ||
+        resource.data.ownerUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow create: if signedIn() && (
+        request.resource.data.memberUid == request.auth.uid ||
+        request.resource.data.ownerUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow update: if signedIn() && (
+        resource.data.memberUid == request.auth.uid ||
+        resource.data.ownerUid == request.auth.uid ||
+        isAdmin()
+      );
+      allow delete: if false;
+    }
+
+    match /disputes/{disputeId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.raisedByUid == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if signedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow create: if signedIn();
+      allow update, delete: if false;
+    }
+  }
+}
