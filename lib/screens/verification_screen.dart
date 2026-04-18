@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../app/app_routes.dart';
 import '../controllers/app_controller.dart';
 
 class VerificationScreen extends StatefulWidget {
@@ -72,7 +73,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
       _snack(controller.errorMessage!);
       return;
     }
-    _snack('Verification submitted. Awaiting admin approval.');
+    _snack('Verification approved successfully.');
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.home,
+      (route) => false,
+    );
   }
 
   @override
@@ -84,8 +89,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           const Text(
-            'Upload CNIC front/back, capture live selfie, and accept terms. '
-            'Status remains pending until manual admin approval.',
+            'Upload CNIC front/back, capture live selfie, and accept terms to '
+            'complete verification.',
           ),
           const SizedBox(height: 16),
           _UploadCard(
