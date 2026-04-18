@@ -28,26 +28,36 @@ class AuthService {
   Future<String> sendOtp({
     required String phoneNumber,
     required Duration timeout,
+    void Function(PhoneAuthCredential credential)? onVerificationCompleted,
+    void Function(FirebaseAuthException error)? onVerificationFailed,
+    void Function(String verificationId, int? resendToken)? onCodeSent,
+    void Function(String verificationId)? onCodeAutoRetrievalTimeout,
   }) async {
     final completer = Completer<String>();
 
     await _firebaseAuth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
       timeout: timeout,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await _firebaseAuth.signInWithCredential(credential);
+      verificationCompleted: (PhoneAuthCredential credential) {
+        onVerificationCompleted?.call(credential);
+        if (!completer.isCompleted) {
+          completer.complete(credential.verificationId ?? 'auto');
+        }
       },
       verificationFailed: (FirebaseAuthException error) {
+        onVerificationFailed?.call(error);
         if (!completer.isCompleted) {
           completer.completeError(error);
         }
       },
       codeSent: (String verificationId, int? resendToken) {
+        onCodeSent?.call(verificationId, resendToken);
         if (!completer.isCompleted) {
           completer.complete(verificationId);
         }
       },
       codeAutoRetrievalTimeout: (String verificationId) {
+        onCodeAutoRetrievalTimeout?.call(verificationId);
         if (!completer.isCompleted) {
           completer.complete(verificationId);
         }

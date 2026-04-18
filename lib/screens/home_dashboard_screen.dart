@@ -45,23 +45,66 @@ class HomeDashboardScreen extends StatelessWidget {
               return ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Card(
-                    child: ListTile(
-                      title: Text(
-                        user == null
-                            ? 'Loading profile...'
-                            : user.fullName.isEmpty
-                            ? user.phoneNumber
-                            : user.fullName,
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF3949AB), Color(0xFF1E88E5)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      subtitle: Text(
-                        user == null
-                            ? ''
-                            : 'Verification: ${user.verificationStatus.name.toUpperCase()}',
-                      ),
-                      trailing: Text(
-                        'Trust ${user?.trustScore.toStringAsFixed(0) ?? '0'}%',
-                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user == null
+                                    ? 'Loading profile...'
+                                    : user.fullName.isEmpty
+                                    ? user.phoneNumber
+                                    : user.fullName,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                user == null
+                                    ? ''
+                                    : 'Verification: ${user.verificationStatus.name.toUpperCase()}',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodyMedium?.copyWith(
+                                  color: Colors.white70,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Trust ${user?.trustScore.toStringAsFixed(0) ?? '0'}%',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -138,7 +181,7 @@ class _CommitteeCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -155,6 +198,7 @@ class _CommitteeCard extends StatelessWidget {
             ),
             Text(
               'Invite: ${committee.inviteCode} | Members ${committee.memberCount}/${committee.memberLimit}',
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
             LinearProgressIndicator(value: committee.progressPercent()),

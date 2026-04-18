@@ -75,34 +75,38 @@ class _DisputeScreenState extends State<DisputeScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _reasonController,
-                  decoration: const InputDecoration(
-                    labelText: 'Reason',
-                    border: OutlineInputBorder(),
-                  ),
-                  minLines: 3,
-                  maxLines: 4,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _reasonController,
+                      decoration: const InputDecoration(
+                        labelText: 'Reason',
+                      ),
+                      minLines: 3,
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _submitting
+                            ? null
+                            : () => _raiseDispute(context),
+                        child: _submitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Text('Raise Dispute'),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _submitting
-                        ? null
-                        : () => _raiseDispute(context),
-                    child: _submitting
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Raise Dispute'),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
           Expanded(

@@ -49,43 +49,57 @@ class _JoinCommitteeScreenState extends State<JoinCommitteeScreen> {
     final controller = context.read<AppController>();
     return AppScaffold(
       title: 'Join Committee',
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: _inviteCodeController,
-                textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
-                  labelText: 'Invite Code',
-                  hintText: 'e.g. 12AB34CD',
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Join with Invite Code',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _inviteCodeController,
+                      textCapitalization: TextCapitalization.characters,
+                      decoration: const InputDecoration(
+                        labelText: 'Invite Code',
+                        hintText: 'e.g. 12AB34CD',
+                        prefixIcon: Icon(Icons.vpn_key_outlined),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Invite code is required.';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _joining ? null : () => _submit(controller),
+                        icon: _joining
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Icon(Icons.group_add_outlined),
+                        label: Text(_joining ? 'Joining...' : 'Join Committee'),
+                      ),
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Invite code is required.';
-                  }
-                  return null;
-                },
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _joining ? null : () => _submit(controller),
-                  icon: _joining
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.group_add_outlined),
-                  label: Text(_joining ? 'Joining...' : 'Join Committee'),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
