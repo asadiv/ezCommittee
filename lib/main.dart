@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -28,13 +27,18 @@ Future<void> main() async {
 class EzCommitteeApp extends StatelessWidget {
   const EzCommitteeApp({super.key});
 
+  static const _brandGradient = LinearGradient(
+    colors: [Color(0xFF3949AB), Color(0xFF1E88E5)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<AppController>(
       create: (_) => AppController(
         firebaseAuth: FirebaseAuth.instance,
         firestore: FirebaseFirestore.instance,
-        storage: FirebaseStorage.instance,
       ),
       child: Consumer<AppController>(
         builder: (context, controller, _) {
@@ -42,8 +46,69 @@ class EzCommitteeApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'Digital Committee Management',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
+                primary: const Color(0xFF3949AB),
+              ),
               useMaterial3: true,
+              scaffoldBackgroundColor: const Color(0xFFF5F7FC),
+              appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+              cardTheme: CardThemeData(
+                margin: EdgeInsets.zero,
+                elevation: 1,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              inputDecorationTheme: InputDecorationTheme(
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: Colors.indigo.withValues(alpha: 0.08),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: Color(0xFF3949AB)),
+                ),
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              filledButtonTheme: FilledButtonThemeData(
+                style: FilledButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 14,
+                  ),
+                ),
+              ),
+              textTheme: const TextTheme(
+                headlineSmall: TextStyle(fontWeight: FontWeight.w700),
+                titleLarge: TextStyle(fontWeight: FontWeight.w700),
+                titleMedium: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             home: _RootGate(controller: controller),
             onGenerateRoute: (settings) {
@@ -123,8 +188,21 @@ class _RootGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final overlay = Container(
+      decoration: const BoxDecoration(gradient: EzCommitteeApp._brandGradient),
+    );
     if (controller.loading && controller.firebaseUser == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            overlay,
+            const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          ],
+        ),
+      );
     }
     if (!controller.isSignedIn) {
       return const LoginScreen();

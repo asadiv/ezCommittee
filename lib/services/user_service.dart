@@ -83,9 +83,10 @@ class UserService {
     required bool termsAccepted,
   }) async {
     await usersRef(_db).doc(uid).update({
-      'cnicFrontUrl': _crypto.encryptText(cnicFrontUrl),
-      'cnicBackUrl': _crypto.encryptText(cnicBackUrl),
-      'selfieUrl': _crypto.encryptText(selfieUrl),
+      // Keep raw Base64 for verification media so Firebase Storage is not needed.
+      'cnicFrontUrl': cnicFrontUrl,
+      'cnicBackUrl': cnicBackUrl,
+      'selfieUrl': selfieUrl,
       'termsAccepted': termsAccepted,
       'verificationStatus': VerificationStatus.pending.value,
       'updatedAt': Timestamp.fromDate(DateTime.now()),

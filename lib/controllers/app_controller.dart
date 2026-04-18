@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/app_user.dart';
@@ -28,10 +27,8 @@ class AppController extends ChangeNotifier {
   AppController({
     FirebaseAuth? firebaseAuth,
     FirebaseFirestore? firestore,
-    FirebaseStorage? storage,
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance,
-       _storage = storage ?? FirebaseStorage.instance {
+       _firestore = firestore ?? FirebaseFirestore.instance {
     _authService = AuthService(firebaseAuth: _firebaseAuth);
     _userService = UserService(_firestore);
     _committeeService = CommitteeService(_firestore);
@@ -40,13 +37,12 @@ class AppController extends ChangeNotifier {
     _messagingService = MessagingService(_firestore);
     _disputeService = DisputeService(_firestore);
     _payoutService = PayoutService(firestore: _firestore);
-    _verificationService = VerificationService(_storage);
+    _verificationService = VerificationService();
     _authSub = _authService.authStateChanges().listen(_onAuthStateChanged);
   }
 
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
-  final FirebaseStorage _storage;
   final CryptoService _crypto = CryptoService.instance;
 
   late final AuthService _authService;
@@ -67,6 +63,8 @@ class AppController extends ChangeNotifier {
   bool loading = false;
   String? errorMessage;
   String? verificationId;
+  PhoneAuthCredential? _autoRetrievedCredential;
+  bool get hasAutoRetrievedCredential => _autoRetrievedCredential != null;
 
   bool get isSignedIn => firebaseUser != null;
 
@@ -83,10 +81,36 @@ class AppController extends ChangeNotifier {
 
   Future<String?> sendOtp(String phoneNumber) async {
     await _runSafely(() async {
-      verificationId = await _authService.sendOtp(
+      _autoRetrievedCredential = null;
+      final sentVerificationId = await _authService.sendOtp(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
+        onVerificationCompleted: (credential) {
+          _autoRetrievedCredential = credential;
+          final autoVerificationId = credential.verificationId;
+          if (autoVerificationId != null && autoVerificationId.isNotEmpty) {
+            verificationId = autoVerificationId;
+          }
+        },
+        onVerificationFailed: (error) {
+          errorMessage = error.message ?? 'Phone verification failed.';
+        },
+        onCodeSent: (id, _) {
+          verificationId = id;
+        },
+        onCodeAutoRetrievalTimeout: (id) {
+          if (verificationId == null || verificationId!.isEmpty) {
+            verificationId = id;
+          }
+        },
       );
+      if (sentVerificationId.isNotEmpty && sentVerificationId != 'auto') {
+        verificationId = sentVerificationId;
+      }
+      if ((verificationId == null || verificationId!.isEmpty) &&
+          _autoRetrievedCredential == null) {
+        throw StateError('Unable to send OTP. Please try again.');
+      }
     });
     return verificationId;
   }
@@ -98,13 +122,23 @@ class AppController extends ChangeNotifier {
   }) async {
     await _runSafely(() async {
       final currentVerification = verificationId;
-      if (currentVerification == null || currentVerification.isEmpty) {
-        throw StateError('Please request OTP first.');
+      final code = otpCode.trim();
+      UserCredential credential;
+      if (code.isNotEmpty) {
+        if (currentVerification == null || currentVerification.isEmpty) {
+          throw StateError('Please request OTP first.');
+        }
+        credential = await _authService.verifyOtp(
+          verificationId: currentVerification,
+          smsCode: code,
+        );
+      } else if (_autoRetrievedCredential != null) {
+        credential = await _firebaseAuth.signInWithCredential(
+          _autoRetrievedCredential!,
+        );
+      } else {
+        throw StateError('Please enter the OTP sent to your phone.');
       }
-      final credential = await _authService.verifyOtp(
-        verificationId: currentVerification,
-        smsCode: otpCode,
-      );
       firebaseUser = credential.user;
       final uid = firebaseUser?.uid;
       if (uid == null) {
@@ -119,6 +153,8 @@ class AppController extends ChangeNotifier {
         passwordHash: hashedPassword,
         fcmToken: fcmToken,
       );
+      _autoRetrievedCredential = null;
+      verificationId = null;
     });
   }
 
@@ -427,6 +463,7 @@ class AppController extends ChangeNotifier {
     firebaseUser = null;
     appUser = null;
     verificationId = null;
+    _autoRetrievedCredential = null;
   }
 
   @override

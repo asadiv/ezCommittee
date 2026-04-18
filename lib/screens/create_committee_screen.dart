@@ -81,104 +81,148 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            TextFormField(
-              controller: _name,
-              decoration: const InputDecoration(labelText: 'Committee name'),
-              validator: (v) =>
-                  (v == null || v.trim().isEmpty) ? 'Required' : null,
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _amount,
-              decoration: const InputDecoration(
-                labelText: 'Contribution amount',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) {
-                final amount = double.tryParse(v ?? '');
-                if (amount == null || amount <= 0) {
-                  return 'Enter valid amount';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<CommitteeFrequency>(
-              initialValue: _frequency,
-              decoration: const InputDecoration(labelText: 'Frequency'),
-              items: CommitteeFrequency.values
-                  .map(
-                    (f) => DropdownMenuItem(
-                      value: f,
-                      child: Text(f.name.toUpperCase()),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Committee Details',
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
-                  )
-                  .toList(),
-              onChanged: (v) => setState(() => _frequency = v ?? _frequency),
-            ),
-            if (_frequency == CommitteeFrequency.custom) ...[
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _customFrequency,
-                decoration: const InputDecoration(
-                  labelText: 'Custom frequency label',
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _name,
+                      decoration: const InputDecoration(
+                        labelText: 'Committee name',
+                      ),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _amount,
+                      decoration: const InputDecoration(
+                        labelText: 'Contribution amount',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        final amount = double.tryParse(v ?? '');
+                        if (amount == null || amount <= 0) {
+                          return 'Enter valid amount';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<CommitteeFrequency>(
+                      initialValue: _frequency,
+                      decoration: const InputDecoration(labelText: 'Frequency'),
+                      items: CommitteeFrequency.values
+                          .map(
+                            (f) => DropdownMenuItem(
+                              value: f,
+                              child: Text(f.name.toUpperCase()),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => _frequency = v ?? _frequency),
+                    ),
+                    if (_frequency == CommitteeFrequency.custom) ...[
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _customFrequency,
+                        decoration: const InputDecoration(
+                          labelText: 'Custom frequency label',
+                        ),
+                        validator: (v) =>
+                            _frequency == CommitteeFrequency.custom &&
+                                (v == null || v.trim().isEmpty)
+                            ? 'Required'
+                            : null,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _intervals,
+                      decoration: const InputDecoration(
+                        labelText: 'Total cycle intervals',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        final parsed = int.tryParse(v ?? '');
+                        if (parsed == null || parsed <= 0) {
+                          return 'Enter valid number';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _members,
+                      decoration: const InputDecoration(
+                        labelText: 'Number of members',
+                      ),
+                      keyboardType: TextInputType.number,
+                      validator: (v) {
+                        final parsed = int.tryParse(v ?? '');
+                        if (parsed == null || parsed < 2) {
+                          return 'Minimum 2 members';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
-                validator: (v) =>
-                    _frequency == CommitteeFrequency.custom &&
-                        (v == null || v.trim().isEmpty)
-                    ? 'Required'
-                    : null,
               ),
-            ],
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _intervals,
-              decoration: const InputDecoration(
-                labelText: 'Total cycle intervals',
-              ),
-              keyboardType: TextInputType.number,
-              validator: (v) {
-                final parsed = int.tryParse(v ?? '');
-                if (parsed == null || parsed <= 0) {
-                  return 'Enter valid number';
-                }
-                return null;
-              },
             ),
             const SizedBox(height: 12),
-            TextFormField(
-              controller: _members,
-              decoration: const InputDecoration(labelText: 'Number of members'),
-              keyboardType: TextInputType.number,
-              validator: (v) {
-                final parsed = int.tryParse(v ?? '');
-                if (parsed == null || parsed < 2) {
-                  return 'Minimum 2 members';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _easypaisa,
-              decoration: const InputDecoration(labelText: 'Easypaisa number'),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _jazzCash,
-              decoration: const InputDecoration(labelText: 'JazzCash number'),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _bank,
-              decoration: const InputDecoration(
-                labelText: 'Bank account details',
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Payment Instructions',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _easypaisa,
+                      decoration: const InputDecoration(
+                        labelText: 'Easypaisa number',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _jazzCash,
+                      decoration: const InputDecoration(
+                        labelText: 'JazzCash number',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _bank,
+                      decoration: const InputDecoration(
+                        labelText: 'Bank account details',
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 20),
             FilledButton(
               onPressed: _loading ? null : _submit,
-              child: Text(_loading ? 'Creating...' : 'Create Committee'),
+              child: _loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Create Committee'),
             ),
           ],
         ),

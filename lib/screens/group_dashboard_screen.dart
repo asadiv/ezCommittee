@@ -84,20 +84,30 @@ class _GroupDashboardScreenState extends State<GroupDashboardScreen> {
                       body: ListView(
                         padding: const EdgeInsets.all(16),
                         children: [
-                          Text(
-                            'State: ${committee.state.name.toUpperCase()}',
-                            style: Theme.of(context).textTheme.labelLarge,
+                          Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(14),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'State: ${committee.state.name.toUpperCase()}',
+                                    style: Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  LinearProgressIndicator(
+                                    value: committee.progressPercent(),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Cycle ${committee.currentInterval}/${committee.totalIntervals}',
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text('Invite code: ${committee.inviteCode}'),
+                                ],
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: committee.progressPercent(),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Cycle ${committee.currentInterval}/${committee.totalIntervals}',
-                          ),
-                          const SizedBox(height: 12),
-                          Text('Invite code: ${committee.inviteCode}'),
                           const SizedBox(height: 16),
                           _memberTable(
                             members: members,
@@ -106,17 +116,20 @@ class _GroupDashboardScreenState extends State<GroupDashboardScreen> {
                           ),
                           const SizedBox(height: 20),
                           if (canPayNow)
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.of(context).pushNamed(
-                                  AppRoutes.payment,
-                                  arguments: PaymentScreenArgs(
-                                    committee: committee,
-                                    payment: myIntervalPayment,
-                                  ),
-                                );
-                              },
-                              child: const Text('Pay Now'),
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pushNamed(
+                                    AppRoutes.payment,
+                                    arguments: PaymentScreenArgs(
+                                      committee: committee,
+                                      payment: myIntervalPayment,
+                                    ),
+                                  );
+                                },
+                                child: const Text('Pay Now'),
+                              ),
                             ),
                           const SizedBox(height: 12),
                           Row(

@@ -24,9 +24,14 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(title), actions: actions),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: child ?? body!,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 900),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: child ?? body!,
+            ),
+          ),
         ),
       ),
       floatingActionButton: floatingActionButton,

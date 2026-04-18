@@ -1,11 +1,8 @@
 import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:convert';
 
 class VerificationService {
-  VerificationService(this._storage);
-
-  final FirebaseStorage _storage;
+  VerificationService();
 
   Future<String> uploadCnicFront({
     required String uid,
@@ -30,8 +27,13 @@ class VerificationService {
     required File file,
     required String label,
   }) async {
-    final ref = _storage.ref('verifications/$uid/$label.jpg');
-    await ref.putFile(file);
-    return ref.getDownloadURL();
+    if (uid.isEmpty) {
+      throw StateError('User id is required to process $label image.');
+    }
+    final compressedBytes = await file.readAsBytes();
+    if (compressedBytes.isEmpty) {
+      throw StateError('Unable to process $label image.');
+    }
+    return base64Encode(compressedBytes);
   }
 }
