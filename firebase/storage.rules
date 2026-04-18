@@ -1,0 +1,24 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Verification assets (CNIC + selfie)
+    match /verifications/{uid}/{fileName} {
+      allow read: if isSelf(uid) || isAdmin();
+      allow write: if isSelf(uid);
+      allow delete: if isSelf(uid) || isAdmin();
+    }
+  }
+}
